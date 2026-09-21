@@ -266,6 +266,8 @@ Os scripts `dev` e `build` rodam com `TZ=UTC`, então um post datado `2026-09-20
 - **Fontes de ícones**: o tema espera `/fonts/refineui-system-icons-*.woff2` na raiz do site, então as cópias ficam em `public/fonts/`. Depois de atualizar o `@pelagornis/page`, renove-as a partir de `node_modules/@refineui/web-icons/dist/fonts/`.
 - **Logo**: `src/assets/logo.svg` (e `public/favicon.svg`) é o símbolo do Cloche, vindo de `rpm-repo/sources/cloche-common/usr/share/icons/breeze/places/cloche-symbolic-current.svg`.
 
+> **Pendente (ainda não feito):** o par de chaves do Cosign. Até ele existir não há `cosign.pub` nem `SIGNING_SECRET`, então a imagem não pode ser assinada, e o workflow do CI é só manual (`workflow_dispatch`) para nada ser construído ou publicado a cada push. O site não está hospedado por enquanto; um homelab vai rodá-lo depois. Para publicar: gere as chaves (passo 2 abaixo) e restaure os gatilhos `push`, `pull_request` e `schedule` em `.github/workflows/build.yml`.
+
 ## 3. Publicar (primeira vez)
 
 O repositório nasce só local. Faça uma vez:

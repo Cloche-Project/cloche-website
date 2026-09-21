@@ -1,13 +1,16 @@
 name: build
 
+# Manual only for now: the site is not published yet (no infrastructure to host it, and the Cosign key
+# pair does not exist, so signing would fail). To turn it on, generate the Cosign keys (see the README,
+# "Publish"), then restore the triggers below.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: "00 07 * * *" # daily, after the image repos' 06:00 UTC builds, to refresh the status page
   workflow_dispatch:
+  # push:
+  #   branches: [main]
+  # pull_request:
+  #   branches: [main]
+  # schedule:
+  #   - cron: "00 07 * * *" # daily, after the image repos' 06:00 UTC builds, to refresh the status page
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

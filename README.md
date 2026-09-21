@@ -266,6 +266,8 @@ The `dev` and `build` scripts run with `TZ=UTC`, so a post dated `2026-09-20` ne
 - **Icon fonts**: the theme expects `/fonts/refineui-system-icons-*.woff2` at the site root, so copies live in `public/fonts/`. After updating `@pelagornis/page`, refresh them from `node_modules/@refineui/web-icons/dist/fonts/`.
 - **Logo**: `src/assets/logo.svg` (also `public/favicon.svg`) is the Cloche mark from `rpm-repo/sources/cloche-common/usr/share/icons/breeze/places/cloche-symbolic-current.svg`.
 
+> **Pending (not done yet):** the Cosign key pair. Until it exists there is no `cosign.pub` and no `SIGNING_SECRET`, so the image cannot be signed, and the CI workflow is manual-only (`workflow_dispatch`) so nothing is built or published on push. The site is not being hosted for now; a homelab will run it later. To publish: generate the keys (step 2 below), then restore the `push`, `pull_request` and `schedule` triggers in `.github/workflows/build.yml`.
+
 ## 3. Publish (first time)
 
 The repository starts local-only. Do these once:
