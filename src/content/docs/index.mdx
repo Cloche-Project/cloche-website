@@ -1,0 +1,25 @@
+---
+title: Immutable, container-native Linux images
+description: Immutable, container-native desktop and server images built on Fedora Atomic and bootc.
+template: splash
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import HeroCarousel from '../../components/HeroCarousel.astro';
+
+<HeroCarousel />
+
+<CardGrid>
+	<Card title="Immutable by design" icon="approve-check">
+		The base system stays clean. Applications run as Flatpaks and inside Distrobox, so OS updates don't touch your user space.
+	</Card>
+	<Card title="Zero-drift workstations" icon="setting">
+		System packages are declared in recipes. A fresh machine is one rebase away, with no manual install steps.
+	</Card>
+	<Card title="Built and signed in CI" icon="rocket">
+		Every image is built by GitHub Actions and published to GHCR, so you can verify what you run.
+	</Card>
+	<Card title="One family, several roles" icon="puzzle">
+		Headless base, GNOME and Plasma desktops, a bootc-based PRO line and a gaming-focused Xe line.
+	</Card>
+</CardGrid>

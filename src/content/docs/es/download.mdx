@@ -1,0 +1,16 @@
+---
+title: Descargar
+description: ISOs de instalación de Cloche y cómo conseguir una hoy.
+template: splash
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import DownloadCards from '../../../components/DownloadCards.astro';
+
+Elige una familia. Las ISOs de instalación listas para usar todavía no se han publicado.
+
+<DownloadCards />
+
+<Aside type="note" title="¿Necesitas una ISO hoy?">
+Puedes crear una tú mismo con `cloche-build`. Consulta [Crear una ISO](/es/docs/build-iso/). Si ya usas un sistema Fedora Atomic, también puedes [hacer rebase a una imagen de Cloche](/es/docs/install/) sin necesidad de una ISO.
+</Aside>

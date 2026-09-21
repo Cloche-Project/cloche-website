@@ -1,0 +1,25 @@
+---
+title: Imagens Linux imutáveis e nativas de contêiner
+description: Imagens de desktop e servidor imutáveis e nativas de contêiner, baseadas no Fedora Atomic e no bootc.
+template: splash
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import HeroCarousel from '../../../components/HeroCarousel.astro';
+
+<HeroCarousel />
+
+<CardGrid>
+	<Card title="Imutável por design" icon="approve-check">
+		O sistema base permanece limpo. Os aplicativos rodam como Flatpaks e dentro do Distrobox, então as atualizações do sistema não mexem no seu espaço de usuário.
+	</Card>
+	<Card title="Estações de trabalho sem deriva" icon="setting">
+		Os pacotes do sistema são declarados em receitas. Uma máquina nova está a um rebase de distância, sem passos manuais de instalação.
+	</Card>
+	<Card title="Construído e assinado na CI" icon="rocket">
+		Cada imagem é construída pelo GitHub Actions e publicada no GHCR, para você poder verificar o que executa.
+	</Card>
+	<Card title="Uma família, vários papéis" icon="puzzle">
+		Base headless, desktops GNOME e Plasma, uma linha PRO baseada em bootc e uma linha Xe focada em jogos.
+	</Card>
+</CardGrid>

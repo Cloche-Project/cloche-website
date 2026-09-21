@@ -1,0 +1,101 @@
+---
+import changelog from '../data/changelog.json';
+
+const t = Astro.locals.t;
+const KNOWN_TYPES = ['feat', 'fix', 'perf', 'revert', 'other'];
+const label = (type: string) => (KNOWN_TYPES.includes(type) ? t(`cloche.changelog.type.${type}`) : type);
+---
+
+<div class="changelog not-content">
+	{changelog.unavailable && (
+		<p class="empty">{t('cloche.changelog.unavailable')}</p>
+	)}
+
+	{changelog.families.map((family) => (
+		<section class="family" aria-labelledby={`cl-${family.id}`}>
+			<h2 id={`cl-${family.id}`}>{family.title}</h2>
+			{family.entries.length === 0 ? (
+				<p class="empty">{t('cloche.changelog.empty')}</p>
+			) : (
+				<ul class="entries">
+					{family.entries.map((e) => (
+						<li class="entry">
+							<time datetime={e.date}>{e.date}</time>
+							<span class={`type type-${e.type}`}>{label(e.type)}</span>
+							<span class="text">
+								{e.scope && <span class="scope">{e.scope}: </span>}{e.text}
+								{e.breaking && <strong class="breaking"> {t('cloche.changelog.breaking')}</strong>}
+							</span>
+							<a class="ref" href={e.url}><code>{e.repo}@{e.sha}</code></a>
+						</li>
+					))}
+				</ul>
+			)}
+		</section>
+	))}
+
+	<p class="note" set:html={t('cloche.changelog.note')} />
+</div>
+
+<style>
+	.changelog { margin-top: 1.5rem; }
+
+	.family { margin-bottom: 2.5rem; }
+	.family h2 {
+		margin: 0 0 1rem;
+		font-family: var(--cloche-font-display);
+		font-size: 1.5rem;
+		border: 0;
+	}
+
+	.entries {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		border: 1px solid var(--page-border);
+		border-radius: var(--page-radius-lg, 0.75rem);
+		overflow: hidden;
+	}
+
+	.entry {
+		display: grid;
+		grid-template-columns: 6.5rem 4.5rem 1fr;
+		gap: 0.75rem 1rem;
+		align-items: baseline;
+		margin: 0;
+		padding: 0.75rem 1rem;
+		border-top: 1px solid var(--page-border);
+	}
+	.entry:first-child { border-top: 0; }
+
+	time {
+		font-family: var(--cloche-font-mono);
+		font-size: 0.8125rem;
+		color: var(--page-text-muted);
+	}
+
+	.type {
+		justify-self: start;
+		padding: 0.125rem 0.5rem;
+		border: 1px solid var(--page-border-strong);
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--page-text-secondary);
+	}
+	.type-feat, .type-fix { border-color: var(--c-accent, var(--page-accent)); color: var(--page-accent); }
+
+	.scope { color: var(--page-text-muted); }
+	.breaking { color: #c62828; }
+	.ref { grid-column: 3; margin-top: -0.375rem; font-size: 0.8125rem; text-decoration: none; }
+	.ref code { color: var(--page-text-secondary); }
+	.ref:hover code { color: var(--page-accent); }
+
+	.empty, .note { color: var(--page-text-muted); font-size: 0.9375rem; }
+
+	@media (max-width: 720px) {
+		.entry { grid-template-columns: 5rem 1fr; }
+		.entry .text { grid-column: 1 / -1; grid-row: 2; }
+		.entry .ref { grid-column: 1 / -1; grid-row: 3; margin-top: 0; }
+	}
+</style>

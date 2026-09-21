@@ -1,0 +1,244 @@
+/* Self-hosted fonts: Red Hat family for the site, Zalando Sans Expanded for the Cloche wordmark. */
+@import '@fontsource-variable/red-hat-text';
+@import '@fontsource-variable/red-hat-display';
+@import '@fontsource-variable/red-hat-mono';
+@import '@fontsource-variable/zalando-sans-expanded';
+
+/*
+ * The page theme injects its own CSS after this file, so overrides use doubled
+ * selectors (:root:root) to win regardless of order.
+ */
+:root:root {
+	--cloche-font-text: 'Red Hat Text Variable', 'Red Hat Text', system-ui, sans-serif;
+	--cloche-font-display: 'Red Hat Display Variable', 'Red Hat Display', system-ui, sans-serif;
+	--cloche-font-mono: 'Red Hat Mono Variable', 'Red Hat Mono', ui-monospace, monospace;
+	--cloche-font-wordmark: 'Zalando Sans Expanded Variable', 'Zalando Sans Expanded', system-ui, sans-serif;
+
+	--page-font-family: var(--cloche-font-text);
+	--sl-font: var(--cloche-font-text);
+	--sl-font-system-mono: var(--cloche-font-mono);
+
+	/* Cloche brand blue (#004aff) as the accent color. */
+	/* One radius scale for the whole site. The theme's own values are 2 to 16px and read as squared off. */
+	--page-radius-sm: 0.375rem;
+	--page-radius: 0.625rem;
+	--page-radius-md: 0.625rem;
+	--page-radius-lg: 0.75rem;
+	--page-radius-xl: 1rem;
+	--page-radius-2xl: 1.25rem;
+	--page-radius-3xl: 1.5rem;
+
+	--page-accent: #004aff;
+	--page-accent-hover: #0038c4;
+	--page-accent-light: #e6edff;
+	--page-accent-bg: #e6edff;
+	--sl-color-accent-low: #cfdbff;
+	--sl-color-accent: #004aff;
+	--sl-color-accent-high: #0030a8;
+}
+
+:root[data-theme='dark'] {
+	--page-accent: #5b83ff;
+	--page-accent-hover: #86a3ff;
+	--page-accent-light: #0b1a4d;
+	--page-accent-bg: #0b1a4d;
+	--sl-color-accent-low: #001a66;
+	--sl-color-accent: #3d6bff;
+	--sl-color-accent-high: #b3c4ff;
+}
+
+h1, h2, h3, h4 {
+	font-family: var(--cloche-font-display);
+}
+
+code, kbd, pre, samp {
+	font-family: var(--cloche-font-mono);
+}
+
+/* The home page's carousel carries the visible headings; keep the page h1 for screen readers and SEO only. */
+:root:has(.hero-carousel) #_top {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* The theme's scoped `.page-title-text` rule is more specific than a plain class, so double up. */
+:root:root .page-site-title,
+:root:root .page-title-text {
+	font-family: var(--cloche-font-wordmark);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+/*
+ * Translucent, blurred header that floats over the scrolling content. The theme keeps the header
+ * in flow above the scroll area, so nothing ever passes behind it; a negative margin pulls the
+ * scroll area up under it and the content gets matching top padding, so nothing is cut off.
+ */
+:root:root .page > .header,
+:root:root .page-nav-wrap > .header {
+	margin-bottom: calc(-1 * var(--page-header-height));
+	/* The blur lives on this wrapper: on the theme's own `.page-header` (which has isolation/transform) it has no effect.
+	   Only the unprefixed property: the minifier collapses a prefixed pair into the -webkit- one, which Chrome and Firefox ignore. */
+	backdrop-filter: blur(16px) saturate(160%);
+}
+
+:root:root .main-frame {
+	padding-top: var(--page-header-height);
+}
+
+:root:root:root .page-header {
+	background: color-mix(in srgb, var(--page-bg) 55%, transparent) !important;
+	backdrop-filter: none !important;
+	border-bottom: 1px solid color-mix(in srgb, var(--page-border) 60%, transparent);
+	box-shadow: none !important;
+}
+
+/*
+ * The theme hides the header links on small screens and only offers a menu button on pages that
+ * have a sidebar, which leaves the home page (and Blog everywhere) unreachable. Keep them visible.
+ */
+@media (max-width: 768px) {
+	:root:root .page-nav {
+		display: flex;
+		gap: 0.125rem;
+	}
+
+	:root:root .page-nav .page-nav-link {
+		padding: 0.375rem 0.5rem;
+		font-size: 0.875rem;
+	}
+}
+
+/* On the narrowest phones, drop the GitHub icon to make room for the links. */
+@media (max-width: 400px) {
+	:root:root .page-header-right a {
+		display: none !important;
+	}
+}
+
+/* Tables: one bordered, padded, horizontally scrollable style for Markdown tables and the status page. */
+.md-table-wrap {
+	margin: 1.5rem 0;
+	overflow-x: auto;
+	border: 1px solid var(--page-border);
+	border-radius: var(--page-radius-lg, 0.75rem);
+}
+
+/* Starlight only pads the end of table cells, which leaves text flush against the header band. */
+.md-table-wrap table {
+	/* Starlight makes tables `display: block`, which stops `width: 100%` from stretching the columns. */
+	display: table;
+	margin: 0;
+	width: 100%;
+}
+
+.md-table-wrap table :is(th, td) {
+	padding: 0.75rem 1rem;
+}
+
+.md-table-wrap table tr:last-child td {
+	border-bottom: 0;
+}
+
+@media (max-width: 600px) {
+	.md-table-wrap table :is(th, td) {
+		padding: 0.625rem 0.75rem;
+	}
+}
+
+/* Four links do not fit next to the buttons on the narrowest phones: let the links scroll sideways and pin the buttons. */
+@media (max-width: 400px) {
+	:root:root .page-header-left {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	:root:root .page-header-right {
+		flex: 0 0 auto;
+	}
+
+	:root:root .page-nav {
+		min-width: 0;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	:root:root .page-nav::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Fade the right edge to hint that there is more to scroll. */
+	:root:root .page-nav {
+		mask-image: linear-gradient(to right, #000 85%, transparent);
+	}
+
+	:root:root .page-nav .page-nav-link {
+		flex: 0 0 auto;
+		white-space: nowrap;
+	}
+}
+
+/* The theme renders the footer card even when it has nothing to show. */
+:root:root .page-footer-wrapper:not(:has(.meta > *, .pagination-links > *)) {
+	display: none;
+}
+
+/* Blog lists (index, tags, authors) hide the table of contents but leave its bordered container behind. */
+:root:root:has(.sl-blog-posts) .page-toc-sticky {
+	display: none;
+}
+
+/* Blog list: one card per post. */
+:root:root .sl-blog-posts .sl-blog-preview {
+	padding: 1.5rem;
+	border: 1px solid var(--page-border);
+	border-radius: var(--page-radius-xl, 1rem);
+	background: var(--page-bg-secondary);
+}
+
+:root:root .sl-blog-posts .sl-blog-preview-title {
+	font-family: var(--cloche-font-display);
+	margin: 0;
+}
+
+/* The page title sits flush against the first card otherwise. */
+:root:root .sl-blog-posts {
+	margin-top: 1.5rem;
+}
+
+/* Radius for elements the theme leaves square. Sizes come from the scale in :root. */
+:root:root {
+	--ec-brdRad: var(--page-radius-lg);
+}
+
+:root:root .card.sl-flex,
+:root:root .starlight-aside {
+	border-radius: var(--page-radius-xl);
+}
+
+:root:root .sl-markdown-content :not(pre) > code {
+	border-radius: var(--page-radius-sm);
+}
+
+:root:root .sl-markdown-content details,
+:root:root .sl-markdown-content blockquote {
+	border-radius: var(--page-radius-lg);
+}
+
+:root:root .sl-markdown-content img {
+	border-radius: var(--page-radius-lg);
+}
+
+:root:root .page-footer {
+	border-radius: var(--page-radius-xl) var(--page-radius-xl) 0 0;
+}
+
+:root:root .card.sl-flex .icon,
+:root:root .expressive-code .copy button {
+	border-radius: var(--page-radius-md);
+}

@@ -1,0 +1,100 @@
+---
+const t = Astro.locals.t;
+
+// Swap the disabled button for a real link once an ISO is published for that family.
+// The image names are not translated; the rest comes from src/content/i18n/*.json.
+const NAMES = { cloche: 'Cloche', pro: 'Cloche PRO', xe: 'Cloche Xe' };
+const families = ['cloche', 'pro', 'xe'].map((id) => ({
+	id,
+	eyebrow: id === 'pro' ? 'bootc' : 'rpm-ostree',
+	title: NAMES[id],
+	description: t(`cloche.download.${id}.description`),
+	variants: t(`cloche.download.${id}.variants`),
+}));
+---
+
+<div class="downloads not-content">
+	{families.map((f) => (
+		<article class="card" aria-labelledby={`dl-${f.id}`}>
+			<span class="eyebrow">{f.eyebrow}</span>
+			<h2 id={`dl-${f.id}`} class="title">{f.title}</h2>
+			<p class="desc">{f.description}</p>
+			<p class="variants"><span>{t('cloche.download.variants')}</span> {f.variants}</p>
+			<button type="button" class="soon" disabled>{t('cloche.download.soon')}</button>
+		</article>
+	))}
+</div>
+
+<style>
+	.downloads {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		gap: 1.25rem;
+		margin: 2rem 0;
+	}
+
+	.card {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.75rem;
+		padding: 1.75rem;
+		border: 1px solid var(--page-border);
+		border-radius: var(--page-radius-2xl, 1.5rem);
+		background: var(--page-bg-secondary);
+	}
+
+	.eyebrow {
+		font-family: var(--cloche-font-mono);
+		font-size: 0.8125rem;
+		padding: 0.25rem 0.75rem;
+		border-radius: 999px;
+		border: 1px solid var(--page-border-strong);
+		background: var(--page-bg);
+		color: var(--page-text-secondary);
+	}
+
+	.title {
+		margin: 0.25rem 0 0;
+		border: 0;
+		font-family: var(--cloche-font-wordmark);
+		font-weight: 700;
+		font-size: 1.875rem;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		color: var(--page-text);
+	}
+
+	.desc {
+		margin: 0;
+		line-height: 1.55;
+		color: var(--page-text-secondary);
+	}
+
+	.variants {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--page-text-muted);
+	}
+	.variants span {
+		display: block;
+		margin-bottom: 0.125rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	.soon {
+		appearance: none;
+		margin-top: auto;
+		padding: 0.65rem 1.25rem;
+		border-radius: var(--page-radius-md, 0.5rem);
+		border: 1px dashed var(--page-border-strong);
+		background: transparent;
+		color: var(--page-text-muted);
+		font: inherit;
+		font-weight: 600;
+		cursor: not-allowed;
+	}
+</style>

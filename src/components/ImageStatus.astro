@@ -1,0 +1,75 @@
+---
+import status from '../data/status.json';
+
+const t = Astro.locals.t;
+
+// `state` is the stable key used for styling; the text shown comes from the translations.
+const state = (conclusion: string | undefined) => {
+	if (conclusion === 'success') return 'passing';
+	if (conclusion === 'failure') return 'failing';
+	if (!conclusion) return 'unknown';
+	return conclusion;
+};
+const stateText = (conclusion: string | undefined) => {
+	const key = state(conclusion);
+	return ['passing', 'failing', 'unknown'].includes(key) ? t(`cloche.status.${key}`) : key;
+};
+const fmt = (iso: string) => new Date(iso).toISOString().slice(0, 10);
+---
+
+<div class="md-table-wrap">
+	<table>
+		<thead>
+			<tr><th>{t('cloche.status.image')}</th><th class="build-col">{t('cloche.status.build')}</th></tr>
+		</thead>
+		<tbody>
+			{status.images.map((i) => (
+				<tr>
+					<td>
+						<a href={i.packageUrl}><code>{i.image}</code></a>
+						<span class="pull"><code>{i.pull}</code></span>
+					</td>
+					<td class="build-col">
+						{i.run ? (
+							<a href={i.run.url} class={`badge ${state(i.run.conclusion)}`}>
+								{stateText(i.run.conclusion)} · {fmt(i.run.updatedAt)}
+							</a>
+						) : (
+							<span class="badge unknown">{t('cloche.status.unknown')}</span>
+						)}
+					</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+</div>
+<p><small set:html={t('cloche.status.generated', { date: fmt(status.generatedAt) })} /></p>
+
+<style>
+	.md-table-wrap table .build-col { white-space: nowrap; width: 1%; }
+
+	.md-table-wrap .pull {
+		display: block;
+		margin-top: 0.375rem;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+		overflow-wrap: anywhere;
+	}
+
+	.md-table-wrap a.badge {
+		font-size: var(--sl-text-sm);
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.md-table-wrap a.badge:hover { text-decoration: underline; }
+	/* Explicit colors with !important: the theme forces link colors, and its success token is not green in dark mode. */
+	.md-table-wrap a.badge.passing { color: #16833a !important; }
+	.md-table-wrap a.badge.failing { color: #c62828 !important; }
+	:global([data-theme='dark']) .md-table-wrap a.badge.passing { color: #4ade80 !important; }
+	:global([data-theme='dark']) .md-table-wrap a.badge.failing { color: #f87171 !important; }
+	.md-table-wrap .badge.unknown { color: var(--sl-color-gray-3); }
+
+	@media (max-width: 600px) {
+		.md-table-wrap table .build-col { white-space: normal; width: 6.5rem; }
+	}
+</style>

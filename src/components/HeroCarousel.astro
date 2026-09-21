@@ -1,0 +1,304 @@
+---
+import logo from '../assets/logo.svg';
+import { localePath } from '../i18n';
+
+const t = Astro.locals.t;
+
+// The image names follow the os-release pretty names (Cloche, Cloche PRO) and are not translated.
+// Every other string comes from src/content/i18n/*.json.
+const NAMES = { cloche: 'Cloche', pro: 'Cloche PRO', xe: 'Cloche Xe' };
+const slides = ['cloche', 'pro', 'xe'].map((id) => ({
+	id,
+	eyebrow: id === 'pro' ? 'bootc' : 'rpm-ostree',
+	title: NAMES[id],
+	lead: t(`cloche.hero.${id}.lead`),
+	primary: { label: t(`cloche.hero.${id}.primary`), href: localePath(Astro, '/download/') },
+	secondary: { label: t(`cloche.hero.${id}.secondary`), href: localePath(Astro, id === 'pro' ? '/status/' : '/docs/variants/') },
+}));
+---
+
+<section class="hero-carousel not-content" aria-roledescription="carousel" aria-label={t('cloche.hero.label')} data-pause={t('cloche.hero.pause')} data-play={t('cloche.hero.play')}>
+	<div class="stage" aria-live="off">
+		{slides.map((s, i) => (
+			<article
+				class={`slide slide-${s.id}`}
+				role="group"
+				aria-roledescription="slide"
+				aria-label={t('cloche.hero.slide', { index: i + 1, total: slides.length })}
+				data-active={i === 0 ? 'true' : 'false'}
+				inert={i !== 0}
+			>
+				<img class="watermark" src={logo.src} alt="" aria-hidden="true" />
+				<div class="copy">
+					<span class="eyebrow">{s.eyebrow}</span>
+					<h2 class="title">{s.title}</h2>
+					<p class="lead">{s.lead}</p>
+					<div class="actions">
+						<a class="btn primary" href={s.primary.href}>{s.primary.label}</a>
+						<a class="btn" href={s.secondary.href}>{s.secondary.label}</a>
+					</div>
+				</div>
+			</article>
+		))}
+	</div>
+
+	<div class="controls">
+		<button type="button" class="ctl prev" aria-label={t('cloche.hero.prev')}>
+			<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+		</button>
+		<div class="dots" role="tablist" aria-label={t('cloche.hero.choose')}>
+			{slides.map((s, i) => (
+				<button type="button" class="dot" role="tab" aria-label={t('cloche.hero.show', { title: s.title })} aria-selected={i === 0 ? 'true' : 'false'} data-index={i}></button>
+			))}
+		</div>
+		<button type="button" class="ctl next" aria-label={t('cloche.hero.next')}>
+			<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+		</button>
+		<button type="button" class="ctl toggle" aria-label={t('cloche.hero.pause')} data-playing="true">
+			<svg class="icon-pause" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+			<svg class="icon-play" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10-6.5a1 1 0 0 0 0-1.72l-10-6.5A1 1 0 0 0 8 5.5z" /></svg>
+		</button>
+	</div>
+</section>
+
+<script>
+	const root = document.querySelector<HTMLElement>('.hero-carousel');
+	if (root) {
+		const slides = Array.from(root.querySelectorAll<HTMLElement>('.slide'));
+		const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('.dot'));
+		const toggle = root.querySelector<HTMLButtonElement>('.toggle')!;
+		const stage = root.querySelector<HTMLElement>('.stage')!;
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const INTERVAL = 8000;
+		let index = 0;
+		let timer: number | undefined;
+		let playing = !reduced.matches;
+		let hovering = false;
+
+		const show = (i: number) => {
+			index = (i + slides.length) % slides.length;
+			slides.forEach((s, n) => {
+				const active = n === index;
+				s.dataset.active = String(active);
+				s.inert = !active;
+			});
+			dots.forEach((d, n) => d.setAttribute('aria-selected', String(n === index)));
+		};
+		const stop = () => {
+			window.clearInterval(timer);
+			timer = undefined;
+		};
+		const start = () => {
+			stop();
+			if (playing && !hovering && !document.hidden) timer = window.setInterval(() => show(index + 1), INTERVAL);
+		};
+		const syncToggle = () => {
+			toggle.dataset.playing = String(playing);
+			toggle.setAttribute('aria-label', (playing ? root.dataset.pause : root.dataset.play) ?? '');
+		};
+
+		root.querySelector('.prev')!.addEventListener('click', () => { show(index - 1); start(); });
+		root.querySelector('.next')!.addEventListener('click', () => { show(index + 1); start(); });
+		dots.forEach((d) => d.addEventListener('click', () => { show(Number(d.dataset.index)); start(); }));
+		toggle.addEventListener('click', () => { playing = !playing; syncToggle(); start(); });
+		root.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowLeft') { show(index - 1); start(); }
+			if (e.key === 'ArrowRight') { show(index + 1); start(); }
+		});
+		root.addEventListener('mouseenter', () => { hovering = true; start(); });
+		root.addEventListener('mouseleave', () => { hovering = false; start(); });
+		root.addEventListener('focusin', () => { hovering = true; start(); });
+		root.addEventListener('focusout', () => { hovering = false; start(); });
+		document.addEventListener('visibilitychange', start);
+
+		let touchX: number | null = null;
+		stage.addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+		stage.addEventListener('touchend', (e) => {
+			if (touchX === null) return;
+			const dx = e.changedTouches[0].clientX - touchX;
+			touchX = null;
+			if (Math.abs(dx) > 40) { show(index + (dx < 0 ? 1 : -1)); start(); }
+		});
+
+		syncToggle();
+		start();
+	}
+</script>
+
+<style>
+	.hero-carousel {
+		--c-blue: #004aff;
+		--c-blue-hover: #0038c4;
+		position: relative;
+		margin: var(--page-space-6, 1.5rem) 0 var(--page-space-10, 2.5rem);
+	}
+	:global([data-theme='dark']) .hero-carousel {
+		--c-blue: #3d6bff;
+		--c-blue-hover: #6a8cff;
+	}
+
+	.stage {
+		display: grid;
+		border-radius: var(--page-radius-2xl, 1.5rem);
+		border: 1px solid var(--page-border);
+		overflow: hidden;
+	}
+
+	/* Starlight's markdown flow adds margin-top to sibling elements; that pushed slide 2 down by 1rem. */
+	.stage > .slide {
+		margin: 0 !important;
+	}
+
+	.slide {
+		grid-area: 1 / 1;
+		position: relative;
+		display: flex;
+		align-items: center;
+		min-height: 22rem;
+		padding: clamp(2rem, 5vw, 4.5rem);
+		overflow: hidden;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.5s ease, visibility 0s linear 0.5s;
+		background:
+			radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--c-blue) 20%, transparent), transparent 60%),
+			var(--page-bg-secondary);
+	}
+	.slide[data-active='true'] {
+		opacity: 1;
+		visibility: visible;
+		transition: opacity 0.5s ease, visibility 0s;
+	}
+	.slide-pro {
+		background:
+			radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--c-blue) 30%, transparent), transparent 60%),
+			var(--page-bg-secondary);
+	}
+
+	.watermark {
+		position: absolute;
+		right: -3rem;
+		top: 50%;
+		width: 28rem;
+		height: 28rem;
+		transform: translateY(-50%);
+		opacity: 0.09;
+		pointer-events: none;
+		user-select: none;
+	}
+
+	.copy { position: relative; z-index: 1; max-width: 38rem; }
+
+	.eyebrow {
+		display: inline-block;
+		font-family: var(--cloche-font-mono);
+		font-size: 0.8125rem;
+		letter-spacing: 0.02em;
+		padding: 0.25rem 0.75rem;
+		border-radius: 999px;
+		border: 1px solid var(--page-border-strong);
+		color: var(--page-text-secondary);
+		background: var(--page-bg);
+	}
+
+	.title {
+		margin: 1rem 0 0.75rem;
+		font-family: var(--cloche-font-wordmark);
+		font-weight: 700;
+		font-size: clamp(2.5rem, 6vw, 4rem);
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		color: var(--page-text);
+		border: 0;
+	}
+
+	.lead {
+		margin: 0 0 1.75rem;
+		font-size: 1.125rem;
+		line-height: 1.6;
+		color: var(--page-text-secondary);
+	}
+
+	.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.65rem 1.25rem;
+		border-radius: var(--page-radius-md, 0.5rem);
+		border: 1px solid var(--page-border-strong);
+		background: var(--page-bg);
+		color: var(--page-text);
+		font-weight: 600;
+		text-decoration: none;
+		transition: background 0.15s ease, border-color 0.15s ease;
+	}
+	.btn:hover { border-color: var(--c-blue); }
+	.btn.primary {
+		background: var(--c-blue);
+		border-color: var(--c-blue);
+		color: #fff;
+	}
+	.btn.primary:hover { background: var(--c-blue-hover); border-color: var(--c-blue-hover); }
+	.btn:focus-visible, .ctl:focus-visible, .dot:focus-visible { outline: 2px solid var(--c-blue); outline-offset: 2px; }
+
+	.controls {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		margin-top: 1rem;
+	}
+	.ctl {
+		appearance: none;
+		box-sizing: border-box;
+		width: 2.25rem;
+		height: 2.25rem;
+		min-height: 0;
+		padding: 0;
+		display: grid;
+		place-items: center;
+		border-radius: 999px;
+		border: 1px solid var(--page-border-strong);
+		background: var(--page-bg);
+		color: var(--page-text);
+		cursor: pointer;
+	}
+	.ctl:hover { border-color: var(--c-blue); }
+	.toggle .icon-play { display: none; }
+	.toggle[data-playing='false'] .icon-pause { display: none; }
+	.toggle[data-playing='false'] .icon-play { display: block; }
+
+	.dots { display: flex; align-items: center; gap: 0.25rem; }
+	.dot {
+		appearance: none;
+		box-sizing: border-box;
+		height: 1.5rem;
+		min-height: 0;
+		padding: 0 0.25rem;
+		border: 0;
+		background: none;
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+	}
+	.dot::before {
+		content: '';
+		display: block;
+		width: 0.625rem;
+		height: 0.625rem;
+		border-radius: 999px;
+		background: var(--page-border-strong);
+		transition: width 0.25s ease, background 0.25s ease;
+	}
+	.dot[aria-selected='true']::before { width: 1.75rem; background: var(--c-blue); }
+
+	@media (max-width: 820px) {
+		.slide { min-height: 0; }
+		.watermark { width: 20rem; height: 20rem; right: -6rem; opacity: 0.07; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.slide, .slide[data-active='true'], .dot::before, .btn { transition: none; }
+	}
+</style>
