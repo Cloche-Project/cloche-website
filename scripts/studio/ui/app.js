@@ -95,7 +95,10 @@ function setPanel(name, open, { save = true } = {}) {
 	$(`#${name}`).inert = !open;
 	if (save) remember(name, open ? 'open' : 'closed');
 }
-const togglePanel = (name) => setPanel(name, document.body.dataset[name] !== 'open');
+const togglePanel = (name) => {
+	if (name === 'inspector' && $('#form').hidden) return;
+	setPanel(name, document.body.dataset[name] !== 'open');
+};
 
 function initPanels() {
 	const listOpen = (recall('list') ?? (window.innerWidth >= 760 ? 'open' : 'closed')) === 'open';
@@ -342,6 +345,8 @@ function focusContent() {
 function showEditor(visible) {
 	$('#form').hidden = !visible;
 	$('#empty').hidden = visible;
+	// The properties panel belongs to an open entry; without one there is nothing to show.
+	$('#toggle-inspector').disabled = !visible;
 	if (!visible) $('#preview').srcdoc = '';
 }
 
@@ -425,6 +430,8 @@ async function renderEditor(body) {
 	// Previewing was on for a page that can no longer be previewed.
 	forceSource = /\.mdx$/.test(state.current.file ?? '');
 	showEditor(true);
+	// The browser's spellchecker follows `lang`, so the text is checked in the language of this entry.
+	$('.page').lang = $('#fields').lang = state.current.locale ?? '';
 	const slot = $('#title-slot');
 	const box = $('#fields');
 	slot.replaceChildren();
